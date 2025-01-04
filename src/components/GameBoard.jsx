@@ -6,7 +6,7 @@ const initialGameBoard = [
   [null, null, null],
 ];
 
-export default function GameBoard() {
+export default function GameBoard({ onSelectSquare, activePlayerSymbol }) {
   const [gameBoard, setGameBoard] = useState(initialGameBoard);
 
   function handleSelectSquare(rowIndex, colIndex) {
@@ -17,9 +17,12 @@ export default function GameBoard() {
       const updatedGameBoard = [
         ...prevGameBoard.map((innerArray) => [...innerArray]),
       ];
-      updatedGameBoard[rowIndex][colIndex] = "X";
+      updatedGameBoard[rowIndex][colIndex] = activePlayerSymbol;
       return updatedGameBoard;
     });
+
+    onSelectSquare(); // executing the function that defined outside of this GameBoard component from inside of it
+    // value of 'onSelectSquare' prop is a func and we executing this func here
   }
 
   return (
