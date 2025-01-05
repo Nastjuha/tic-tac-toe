@@ -6,7 +6,12 @@ import Log from "./components/Log.jsx";
 import GameOver from "./components/GameOver.jsx";
 import { WINNING_COMBINATIONS } from "./winning-combinations.js";
 
-const initialGameBoard = [
+const PLAYERS = {
+  X: "Player 1",
+  O: "Player 2",
+};
+
+const INITIAL_GAME_BOARD = [
   [null, null, null],
   [null, null, null],
   [null, null, null],
@@ -22,32 +27,20 @@ function deriveActivePlayer(gameTurns) {
   return currentPlayer;
 }
 
-function App() {
-  const [players, setPlayers] = useState({
-    X: "Player 1",
-    O: "Player 2",
-  });
-  const [gameTurns, setGameTurns] = useState([]); // gameTurns is an array of objects
-
-  const activePlayer = deriveActivePlayer(gameTurns);
-
-  // with that we make sure that we're editing a brand new array
-  // and not the one that's stored in the state
-  // this way we can avoid mutating the state
-  let gameBoard = [...initialGameBoard.map((array) => [...array])];
+function deriveGameBoard(gameTurns) {
+  let gameBoard = [...INITIAL_GAME_BOARD.map((array) => [...array])];
 
   for (const turn of gameTurns) {
     const { square, player } = turn;
     const { row, col } = square;
 
-    // if 'let gameBoard = initialGameBoard;' was used instead of 'let gameBoard = [...initialGameBoard.map((array) => [...array])];'
-    // the gameBoard would be mutated and the game would not work as expected
-    // because the gameBoard would be pointing to the same array as initialGameBoard
-    // and we would be mutating the initialGameBoard array
-    // So when restart is clicked, the initialGameBoard would not be reset to the original state
     gameBoard[row][col] = player;
   }
 
+  return gameBoard;
+}
+
+function deriveWinner(gameBoard, players) {
   let winner = null;
 
   for (const combination of WINNING_COMBINATIONS) {
@@ -61,10 +54,20 @@ function App() {
       firstSquareSymbol === secondSquareSymbol &&
       firstSquareSymbol === thirdSquareSymbol
     ) {
-      winner = players[firstSquareSymbol]; // accessing the prop where the prop name is not hardcoded but stored in some variable or constant
+      winner = players[firstSquareSymbol];
     }
   }
 
+  return winner;
+}
+
+function App() {
+  const [players, setPlayers] = useState(PLAYERS);
+  const [gameTurns, setGameTurns] = useState([]);
+
+  const activePlayer = deriveActivePlayer(gameTurns);
+  const gameBoard = deriveGameBoard(gameTurns);
+  const winner = deriveWinner(gameBoard, players);
   const hasDraw = gameTurns.length === 9 && !winner;
 
   function handleSelectSquare(rowIndex, colIndex) {
@@ -72,7 +75,7 @@ function App() {
       const currentPlayer = deriveActivePlayer(prevTurns);
 
       const updatedTurnes = [
-        { square: { row: rowIndex, col: colIndex }, player: currentPlayer }, // first item of this array is latest turn
+        { square: { row: rowIndex, col: colIndex }, player: currentPlayer },
         ...prevTurns,
       ];
 
@@ -88,7 +91,7 @@ function App() {
     setPlayers((prevPlayers) => {
       return {
         ...prevPlayers,
-        [playerSymbol]: newName, // [] sets the property dynamically
+        [playerSymbol]: newName,
       };
     });
   }
@@ -98,13 +101,13 @@ function App() {
       <div id="game-container">
         <ol id="players" className="highlight-player">
           <Player
-            initialName="Player 1"
+            initialName={PLAYERS.X}
             symbol="X"
             isActive={activePlayer === "X"}
             onChangeName={handlePlayerNameChange}
           />
           <Player
-            initialName="Player 2"
+            initialName={PLAYERS.O}
             symbol="O"
             isActive={activePlayer === "O"}
             onChangeName={handlePlayerNameChange}

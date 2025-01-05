@@ -10,8 +10,6 @@ export default function Player({
   const [isEditing, setIsEditing] = useState(false);
 
   function handleEditClick() {
-    // Best practice to update the state based on the previous state - functional update form
-    // function () => {} inside will receive LATEST state as argument
     setIsEditing((editing) => !editing);
 
     if (isEditing) {
@@ -19,7 +17,6 @@ export default function Player({
     }
   }
 
-  // will be trigged every time the input field changes
   function handleChange(event) {
     setPlayerName(event.target.value);
   }
@@ -28,13 +25,7 @@ export default function Player({
 
   if (isEditing) {
     editablePlayerName = (
-      <input
-        type="text"
-        required
-        // feeding playerNmae back into the value prop of the input element:
-        value={playerName} // - and setting it to the state
-        onChange={handleChange} // getting a value from the input field -
-      />
+      <input type="text" required value={playerName} onChange={handleChange} />
     );
   }
 
