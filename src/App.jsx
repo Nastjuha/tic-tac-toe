@@ -27,12 +27,20 @@ function App() {
 
   const activePlayer = deriveActivePlayer(gameTurns);
 
-  let gameBoard = initialGameBoard;
+  // with that we make sure that we're editing a brand new array
+  // and not the one that's stored in the state
+  // this way we can avoid mutating the state
+  let gameBoard = [...initialGameBoard.map((array) => [...array])];
 
   for (const turn of gameTurns) {
     const { square, player } = turn;
     const { row, col } = square;
 
+    // if 'let gameBoard = initialGameBoard;' was used instead of 'let gameBoard = [...initialGameBoard.map((array) => [...array])];'
+    // the gameBoard would be mutated and the game would not work as expected
+    // because the gameBoard would be pointing to the same array as initialGameBoard
+    // and we would be mutating the initialGameBoard array
+    // So when restart is clicked, the initialGameBoard would not be reset to the original state
     gameBoard[row][col] = player;
   }
 
@@ -68,6 +76,10 @@ function App() {
     });
   }
 
+  function handleRestart() {
+    setGameTurns([]);
+  }
+
   return (
     <main>
       <div id="game-container">
@@ -83,7 +95,9 @@ function App() {
             isActive={activePlayer === "O"}
           />
         </ol>
-        {(winner || hasDraw) && <GameOver winner={winner} />}
+        {(winner || hasDraw) && (
+          <GameOver winner={winner} onRestart={handleRestart} />
+        )}
         <GameBoard onSelectSquare={handleSelectSquare} board={gameBoard} />
       </div>
       <Log turns={gameTurns} />
